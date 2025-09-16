@@ -1,8 +1,7 @@
-// app/layout.tsx - Root layout (Build Guide Step 2.4)
+// app/layout.tsx - Simplified root layout for landing page
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { GlobalProviders } from "@/components/providers/GlobalProviders";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -40,9 +39,7 @@ export default function RootLayout({
   return (
     <html lang="en-GB">
       <body className={inter.className}>
-        <GlobalProviders>
-          {children}
-        </GlobalProviders>
+        {children}
       </body>
     </html>
   );
