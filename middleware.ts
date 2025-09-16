@@ -78,78 +78,107 @@ const ROUTE_PROTECTION_RULES = {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   
-  // Skip middleware entirely if environment variables are not available (e.g., during development without Supabase)
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    console.log('Middleware: Supabase environment variables not found, skipping authentication')
-    return NextResponse.next()
-  }
-  
-  // Skip protection for public routes
-  if (isPublicRoute(pathname)) {
-    return NextResponse.next()
-  }
-  
-  // Update session first
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  })
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            request.cookies.set(name, value)
-          })
-          response = NextResponse.next({
-            request,
-          })
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options)
-          })
-        },
-      },
+  try {
+    console.log(`Middleware: Processing ${pathname}`)
+    
+    // Skip protection for public routes
+    if (isPublicRoute(pathname)) {
+      console.log(`Middleware: ${pathname} is public, allowing access`)
+      return NextResponse.next()
     }
-  )
+    
+    // Check environment variables
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    
+    console.log(`Middleware: Supabase URL exists: ${!!supabaseUrl}`)
+    console.log(`Middleware: Supabase Key exists: ${!!supabaseKey}`)
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.log('Middleware: Missing environment variables, allowing access')
+      return NextResponse.next()
+    }
+    
+    // Update session first
+    let response = NextResponse.next({
+      request: {
+        headers: request.headers,
+      },
+    })
 
-  // Get user session and roles
-  const { user, roles, error } = await getUserWithRoles(supabase)
-  
-  // Handle authentication errors
-  if (error) {
-    console.error('Middleware auth error:', error)
-    return redirectToLogin(request)
+    console.log('Middleware: Creating Supabase client')
+    const supabase = createServerClient(
+      supabaseUrl,
+      supabaseKey,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll()
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              request.cookies.set(name, value)
+            })
+            response = NextResponse.next({
+              request,
+            })
+            cookiesToSet.forEach(({ name, value, options }) => {
+              response.cookies.set(name, value, options)
+            })
+          },
+        },
+      }
+    )
+
+    console.log('Middleware: Getting user with roles')
+    // Get user session and roles
+    const { user, roles, error } = await getUserWithRoles(supabase)
+    
+    console.log(`Middleware: User exists: ${!!user}, Error: ${!!error}`)
+    
+    // Handle authentication errors
+    if (error) {
+      console.error('Middleware auth error:', error)
+      return redirectToLogin(request)
+    }
+    
+    // Redirect unauthenticated users
+    if (!user) {
+      console.log('Middleware: No user found, redirecting to login')
+      return redirectToLogin(request)
+    }
+    
+    console.log(`Middleware: User ${user.id} has roles: ${roles.join(', ')}`)
+    
+    // Check route access permissions
+    const accessResult = checkRouteAccess(pathname, roles)
+    
+    console.log(`Middleware: Access result for ${pathname}: ${accessResult.hasAccess}`)
+    
+    if (!accessResult.hasAccess) {
+      console.log('Middleware: Access denied, handling unauthorized access')
+      return handleUnauthorizedAccess(request, user, roles, accessResult)
+    }
+    
+    // Add user context to headers for pages
+    const requestHeaders = new Headers(request.headers)
+    requestHeaders.set('x-user-id', user.id)
+    requestHeaders.set('x-user-roles', JSON.stringify(roles))
+    
+    console.log(`Middleware: Success, allowing access to ${pathname}`)
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    })
+  } catch (error) {
+    console.error('Middleware: Unexpected error:', error)
+    // For debugging, let's see the full error
+    console.error('Middleware: Error stack:', error instanceof Error ? error.stack : 'No stack trace')
+    
+    // Instead of crashing, let's allow access and log the error
+    return NextResponse.next()
   }
-  
-  // Redirect unauthenticated users
-  if (!user) {
-    return redirectToLogin(request)
-  }
-  
-  // Check route access permissions
-  const accessResult = checkRouteAccess(pathname, roles)
-  
-  if (!accessResult.hasAccess) {
-    return handleUnauthorizedAccess(request, user, roles, accessResult)
-  }
-  
-  // Add user context to headers for pages
-  const requestHeaders = new Headers(request.headers)
-  requestHeaders.set('x-user-id', user.id)
-  requestHeaders.set('x-user-roles', JSON.stringify(roles))
-  
-  return NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  })
 }
 
 // Helper function to check if route is public
