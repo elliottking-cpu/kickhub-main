@@ -23,6 +23,10 @@ export class ParentInvitationService extends EmailPasswordAuth {
   private async initializeServerClient() {
     try {
       this.serverClient = await createAuthServerClient()
+      // Handle case where client is null during build time
+      if (!this.serverClient) {
+        console.log('Server client unavailable during build time')
+      }
     } catch (error) {
       console.error('Failed to initialize server client:', error)
     }

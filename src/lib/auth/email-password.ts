@@ -16,6 +16,10 @@ export class EmailPasswordAuth {
     if (!this.supabase) {
       this.supabase = await createAuthServerClient()
     }
+    // Handle case where client is null during build time
+    if (!this.supabase) {
+      return null
+    }
     return this.supabase
   }
 

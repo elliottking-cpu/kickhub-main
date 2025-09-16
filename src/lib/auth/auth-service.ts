@@ -165,6 +165,14 @@ export class AuthService {
 
       const client = await createAuthServerClient()
 
+      // Handle case where client is null during build time
+      if (!client) {
+        return {
+          success: false,
+          error: { message: 'Service unavailable during build' }
+        }
+      }
+
       // Get user profile
       const { data: profile, error: profileError } = await client
         .from('users')
@@ -288,6 +296,11 @@ export class AuthService {
   private async getChildrenForSubsPayment(userId: string): Promise<string[]> {
     try {
       const client = await createAuthServerClient()
+
+      // Handle case where client is null during build time
+      if (!client) {
+        return []
+      }
 
       const { data, error } = await client
         .from('parent_child_relationships')
