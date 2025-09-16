@@ -29,6 +29,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth(): UseAuthReturn {
   const context = useContext(AuthContext)
   if (!context) {
+    // During static generation or when no provider is available, return a safe default
+    if (typeof window === 'undefined') {
+      return {
+        user: null,
+        session: null,
+        loading: false,
+        isAuthenticated: false,
+        hasRole: () => false,
+        hasPermission: () => false,
+        canPaySubsForChild: () => false,
+        signOut: async () => {},
+        refreshSession: async () => {}
+      }
+    }
     throw new Error('useAuth must be used within an AuthProvider')
   }
   return context

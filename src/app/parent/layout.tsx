@@ -51,8 +51,10 @@ export default async function ParentLayout({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Parent Navigation */}
-      <ParentNavigation />
+      {/* Parent Navigation - Only render on client side */}
+      <Suspense fallback={<div className="h-16 bg-white border-b border-gray-200"></div>}>
+        <ParentNavigation />
+      </Suspense>
       
       {/* Main Content Area */}
       <main className="lg:pl-64">

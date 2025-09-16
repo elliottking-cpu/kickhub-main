@@ -53,6 +53,14 @@ export function RBACProvider({ children }: { children: React.ReactNode }) {
 export function useRBAC() {
   const context = useContext(RBACContext)
   if (context === undefined) {
+    // During static generation or when no provider is available, return a safe default
+    if (typeof window === 'undefined') {
+      return {
+        userRoles: [] as any[],
+        hasRole: () => false,
+        hasPermission: () => false
+      }
+    }
     throw new Error('useRBAC must be used within an RBACProvider')
   }
   return context
