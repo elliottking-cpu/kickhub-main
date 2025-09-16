@@ -1,7 +1,8 @@
 // middleware.ts - Explicit Edge Runtime compatible middleware
 import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-export async function middleware(request) {
+export async function middleware(request: NextRequest) {
   // Most basic possible middleware - just pass through
   console.log(`🚀 EDGE MIDDLEWARE: ${request.nextUrl.pathname}`)
   
