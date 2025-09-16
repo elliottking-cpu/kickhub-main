@@ -24,8 +24,12 @@ export default async function SharedLayout({
   // Skip auth during build time when environment variables might not be available
   try {
     const supabase = await createAuthServerClient()
-    const { data: { user: authUser } } = await supabase.auth.getUser()
-    user = authUser
+    
+    // Handle case where supabase client is null during build time
+    if (supabase) {
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      user = authUser
+    }
 
     // Only do redirects during development, skip during static generation
     if (!user && process.env.NODE_ENV === 'development') {

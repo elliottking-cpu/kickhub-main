@@ -25,8 +25,12 @@ export default async function RefereeLayout({
   // Skip auth during build time when environment variables might not be available
   try {
     const supabase = await createAuthServerClient()
-    const { data: { user: authUser } } = await supabase.auth.getUser()
-    user = authUser
+    
+    // Handle case where supabase client is null during build time
+    if (supabase) {
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      user = authUser
+    }
 
     // Only do redirects during runtime, skip during static generation
     if (user && process.env.NODE_ENV === 'development') {

@@ -24,8 +24,12 @@ export default async function ProfilePage() {
   // Skip auth during build time when environment variables might not be available  
   try {
     const supabase = await createAuthServerClient()
-    const { data: { user: authUser } } = await supabase.auth.getUser()
-    user = authUser
+    
+    // Handle case where supabase client is null during build time
+    if (supabase) {
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      user = authUser
+    }
     
     // Get user roles for displaying role-specific information
     userRoles = await getUserRoles(user?.id)
