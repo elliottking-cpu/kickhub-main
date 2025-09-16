@@ -1,11 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    // Enable Node.js runtime for middleware to fix __dirname issues
-    // This allows middleware to use Node.js APIs like __dirname
-    instrumentationHook: true,
-  },
+  // instrumentationHook is available by default in Next.js 15.5.3
+  // Only need runtime: 'nodejs' in middleware.ts config
 };
 
 export default nextConfig;
