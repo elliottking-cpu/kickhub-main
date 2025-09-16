@@ -9,14 +9,8 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Missing Supabase environment variables. Please check your .env.local file.'
-  )
-}
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 /**
  * Create Supabase client for server components
@@ -27,6 +21,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
  * - Database operations in API routes
  */
 export const createClient = () => {
+  // Defensive check for environment variables during build time
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase environment variables. Please check your environment configuration.')
+  }
+
   const cookieStore = cookies()
   
   return createServerClient(
@@ -67,6 +66,11 @@ export const createClient = () => {
  * - Request/response processing
  */
 export const createMiddlewareClient = (request: NextRequest) => {
+  // Defensive check for environment variables
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase environment variables. Please check your environment configuration.')
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   })

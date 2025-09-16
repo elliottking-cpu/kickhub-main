@@ -9,7 +9,7 @@ export async function GET(
 ) {
   try {
     // Get authenticated user
-    const supabase = await createClient()
+    const supabase = createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -63,7 +63,7 @@ export async function PUT(
   { params }: { params: { teamId: string } }
 ) {
   try {
-    const supabase = await createClient()
+    const supabase = createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
