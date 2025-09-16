@@ -16,11 +16,6 @@ export default function CoachLayout({
       
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto">
-        {/* Header */}
-        <div className="h-16 bg-white border-b border-gray-200 flex items-center px-6">
-          <h1 className="text-xl font-semibold text-gray-900">Coach Dashboard</h1>
-        </div>
-        
         {/* Page Content */}
         <div className="p-6 pb-20 md:pb-6">
           <Suspense
