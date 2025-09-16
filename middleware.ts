@@ -1,17 +1,14 @@
-// middleware.ts - Node.js runtime middleware to fix __dirname issue
+// middleware.ts - Ultra minimal Edge Runtime compatible middleware
 import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
 
-export function middleware(request: NextRequest) {
-  // This should now work with Node.js runtime instead of Edge Runtime
-  console.log(`🚀 NODE.JS MIDDLEWARE: ${request.nextUrl.pathname}`)
+export function middleware(request) {
+  // Log request for debugging
+  console.log(`🚀 MINIMAL MIDDLEWARE: ${request.nextUrl.pathname}`)
   
   return NextResponse.next()
 }
 
 export const config = {
-  // Configure middleware to run in Node.js runtime instead of Edge Runtime
-  runtime: 'nodejs',
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
