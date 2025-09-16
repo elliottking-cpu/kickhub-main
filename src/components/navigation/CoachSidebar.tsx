@@ -4,6 +4,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useRBAC } from '@/components/providers/RBACProvider'
+import { Button } from '@/components/ui/button'
 import {
   Home,
   Users,
@@ -24,10 +26,16 @@ import {
   Zap
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import type { User } from '@supabase/supabase-js'
 
-export function CoachSidebar() {
+interface CoachSidebarProps {
+  user?: User | null
+}
+
+export function CoachSidebar({ user }: CoachSidebarProps) {
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
+  const { hasPermission } = useRBAC()
 
   const navigationSections = [
     {
@@ -72,7 +80,9 @@ export function CoachSidebar() {
       "relative bg-white border-r border-gray-200 transition-all duration-300",
       collapsed ? "w-16" : "w-64"
     )}>
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => setCollapsed(!collapsed)}
         className="absolute -right-3 top-6 z-10 h-6 w-6 rounded-full border bg-white p-0 shadow-md hover:shadow-lg"
       >
@@ -81,7 +91,7 @@ export function CoachSidebar() {
         ) : (
           <ChevronLeft className="h-3 w-3" />
         )}
-      </button>
+      </Button>
 
       <div className="flex h-full flex-col">
         <div className="p-4 border-b border-gray-200">
@@ -141,7 +151,11 @@ export function CoachSidebar() {
   )
 }
 
-export function MobileCoachNavigation() {
+interface MobileCoachNavigationProps {
+  user?: User | null
+}
+
+export function MobileCoachNavigation({ user }: MobileCoachNavigationProps) {
   const pathname = usePathname()
 
   const quickLinks = [
