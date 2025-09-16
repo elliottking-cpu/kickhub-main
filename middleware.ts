@@ -78,6 +78,12 @@ const ROUTE_PROTECTION_RULES = {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   
+  // Skip middleware entirely if environment variables are not available (e.g., during development without Supabase)
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    console.log('Middleware: Supabase environment variables not found, skipping authentication')
+    return NextResponse.next()
+  }
+  
   // Skip protection for public routes
   if (isPublicRoute(pathname)) {
     return NextResponse.next()
