@@ -1,15 +1,25 @@
-// middleware.ts - Explicit Edge Runtime compatible middleware
+// middleware.ts - Node.js runtime middleware to fix __dirname issue
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
-  // Most basic possible middleware - just pass through
-  console.log(`🚀 EDGE MIDDLEWARE: ${request.nextUrl.pathname}`)
+export function middleware(request: NextRequest) {
+  // This should now work with Node.js runtime instead of Edge Runtime
+  console.log(`🚀 NODE.JS MIDDLEWARE: ${request.nextUrl.pathname}`)
   
   return NextResponse.next()
 }
 
-// Minimal matcher
 export const config = {
-  matcher: '/((?!_next/static|_next/image|favicon.ico).*)',
+  // Configure middleware to run in Node.js runtime instead of Edge Runtime
+  runtime: 'nodejs',
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes) 
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
 }
