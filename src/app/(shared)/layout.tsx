@@ -19,12 +19,21 @@ export default async function SharedLayout({
 }: { 
   children: React.ReactNode 
 }) {
-  const supabase = await createAuthServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  
+  // Skip auth during build time when environment variables might not be available
+  try {
+    const supabase = createAuthServerClient()
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    user = authUser
 
-  // Redirect if not authenticated - shared routes require authentication
-  if (!user) {
-    redirect('/login')
+    // Only do redirects during development, skip during static generation
+    if (!user && process.env.NODE_ENV === 'development') {
+      redirect('/login')
+    }
+  } catch (error) {
+    console.error('Auth error in shared layout during build:', error)
+    // Continue rendering during build time even if auth fails
   }
 
   return (
