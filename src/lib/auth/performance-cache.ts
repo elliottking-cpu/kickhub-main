@@ -166,6 +166,16 @@ export class RouteProtectionCache {
   private static async fetchUserDataFromDB(userId: string): Promise<CachedUserData> {
     const supabase = await createClient()
 
+    // Handle case where supabase client is null during build time
+    if (!supabase) {
+      return {
+        roles: [],
+        teams: [],
+        permissions: [],
+        lastUpdated: Date.now()
+      }
+    }
+
     // Fetch user roles
     const { data: userRoles, error: rolesError } = await supabase
       .from('user_roles')

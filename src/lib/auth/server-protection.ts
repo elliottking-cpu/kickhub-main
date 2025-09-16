@@ -5,6 +5,14 @@ import { UnifiedPermissionSystem } from '@/lib/auth/permissions'
 
 export async function requireAuth() {
   const supabase = await createClient()
+  
+  // Handle case where supabase client is null during build time
+  if (!supabase) {
+    // During build time, skip auth requirement
+    console.log('Auth requirement skipped during build time')
+    return null
+  }
+  
   const { data: { user }, error } = await supabase.auth.getUser()
 
   if (error || !user) {

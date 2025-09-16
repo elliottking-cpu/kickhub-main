@@ -249,6 +249,12 @@ export class SecurityAuditLogger {
     try {
       const supabase = await createClient()
       
+      // Handle case where supabase client is null during build time
+      if (!supabase) {
+        console.log('Audit logging unavailable during build time')
+        return
+      }
+      
       const { error } = await supabase
         .from('security_audit_log')
         .insert({
@@ -281,6 +287,12 @@ export class SecurityAuditLogger {
 
     try {
       const supabase = await createClient()
+      
+      // Handle case where supabase client is null during build time
+      if (!supabase) {
+        console.log('Batch audit logging unavailable during build time')
+        return
+      }
       
       const records = events.map(event => ({
         type: event.type,
@@ -320,6 +332,12 @@ export class SecurityAuditLogger {
   ): Promise<AuditLogEntry[]> {
     try {
       const supabase = await createClient()
+      
+      // Handle case where supabase client is null during build time
+      if (!supabase) {
+        console.log('Audit event retrieval unavailable during build time')
+        return []
+      }
       
       let query = supabase
         .from('security_audit_log')
@@ -376,6 +394,12 @@ export class SecurityAuditLogger {
     try {
       const supabase = await createClient()
       
+      // Handle case where supabase client is null during build time
+      if (!supabase) {
+        console.log('Audit event resolution unavailable during build time')
+        return false
+      }
+      
       const { error } = await supabase
         .from('security_audit_log')
         .update({
@@ -410,6 +434,19 @@ export class SecurityAuditLogger {
   }> {
     try {
       const supabase = await createClient()
+      
+      // Handle case where supabase client is null during build time
+      if (!supabase) {
+        console.log('Security stats unavailable during build time')
+        return {
+          totalEvents: 0,
+          eventsByType: {},
+          eventsBySeverity: {},
+          topIPs: [],
+          resolvedPercentage: 0
+        }
+      }
+      
       const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
       
       const { data, error } = await supabase
