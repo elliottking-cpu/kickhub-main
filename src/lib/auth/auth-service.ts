@@ -23,7 +23,7 @@ export class AuthService {
   private emailPasswordAuth: EmailPasswordAuth
   private coachRegistration: CoachRegistration
   private parentInvitation: ParentInvitationService
-  private supabase = createAuthClient()
+  private supabase: any = null
 
   constructor() {
     this.emailPasswordAuth = new EmailPasswordAuth()
