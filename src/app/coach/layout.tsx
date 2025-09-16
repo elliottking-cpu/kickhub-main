@@ -1,6 +1,5 @@
 // app/coach/layout.tsx - Enhanced coach-specific layout with server-side auth (Build Guide Step 2.4)
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createAuthServerClient } from '@/lib/auth/client'
 import { redirect } from 'next/navigation'
 import { CoachSidebar, MobileCoachNavigation } from '@/components/navigation/CoachSidebar'
 import { CoachHeader } from '@/components/navigation/CoachHeader'
@@ -23,7 +22,7 @@ export default async function CoachLayout({
 }: { 
   children: React.ReactNode 
 }) {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createAuthServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   // Redirect if not authenticated

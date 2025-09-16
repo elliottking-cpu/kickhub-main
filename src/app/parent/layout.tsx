@@ -1,30 +1,63 @@
-// app/parent/layout.tsx - Parent-specific layout (Build Guide Step 2.4)
+// app/parent/layout.tsx - Enhanced parent-specific layout with server-side auth (Build Guide Step 2.4)
+import { createAuthServerClient } from '@/lib/auth/client'
+import { redirect } from 'next/navigation'
+import { ParentNavigation } from '@/components/navigation/ParentNavigation'
 import { Suspense } from 'react'
 
-export default function ParentLayout({ 
+/**
+ * Parent Layout - Role-specific layout for parent interface with server-side authentication
+ * 
+ * Features:
+ * - Server-side authentication and role verification
+ * - Parent-specific navigation
+ * - Child management interface
+ * - Mobile-responsive design
+ * - Integration with RBAC system
+ * 
+ * Per Build Guide Step 2.4: Complete route group structure with role-specific layouts
+ */
+export default async function ParentLayout({ 
   children 
 }: { 
   children: React.ReactNode 
 }) {
+  const supabase = await createAuthServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // Redirect if not authenticated
+  if (!user) {
+    redirect('/login')
+  }
+
+  // Verify user has parent role (TODO: Replace with actual database query when schema is implemented in Step 3.1)
+  // For now, using the same email-based logic as middleware for consistency
+  const email = user.email || ''
+  const hasParentRole = email.includes('parent') || email.includes('admin') || 
+    (!email.includes('coach') && !email.includes('player') && !email.includes('referee') && !email.includes('fan'))
+  
+  if (!hasParentRole) {
+    redirect('/unauthorized')
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="h-16 bg-white border-b border-gray-200 flex items-center px-6">
-        <h1 className="text-xl font-semibold text-gray-900">Parent Dashboard</h1>
-      </div>
+      {/* Parent Navigation */}
+      <ParentNavigation user={user} />
       
-      {/* Page Content */}
-      <div className="p-6">
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center min-h-64">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            </div>
-          }
-        >
-          {children}
-        </Suspense>
-      </div>
+      {/* Main Content Area */}
+      <main className="lg:pl-64">
+        <div className="p-6">
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center min-h-64">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            }
+          >
+            {children}
+          </Suspense>
+        </div>
+      </main>
     </div>
   )
 }
