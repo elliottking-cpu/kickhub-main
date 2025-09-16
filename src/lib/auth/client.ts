@@ -13,7 +13,12 @@ import { createClient as createSupabaseClient } from '@/lib/supabase/server'
  * This is used in server components and layouts for authentication
  */
 export const createAuthServerClient = async () => {
-  return await createSupabaseClient()
+  const client = await createSupabaseClient()
+  // During build time, client might be null - return gracefully
+  if (!client) {
+    return null
+  }
+  return client
 }
 
 /**
@@ -22,6 +27,11 @@ export const createAuthServerClient = async () => {
  */
 export async function getServerSession() {
   const supabase = await createAuthServerClient()
+  
+  // During build time, supabase client might be null
+  if (!supabase) {
+    return null
+  }
   
   try {
     const { data: { user }, error } = await supabase.auth.getUser()
@@ -59,6 +69,11 @@ export async function requireAuth() {
 export async function getUserProfile(userId: string) {
   const supabase = await createAuthServerClient()
   
+  // During build time, supabase client might be null
+  if (!supabase) {
+    return null
+  }
+  
   try {
     // This would typically fetch from a profiles or user_roles table
     // For now, return mock data structure
@@ -86,6 +101,11 @@ export async function getUserProfile(userId: string) {
  */
 export async function getUserRoles(userId: string): Promise<string[]> {
   const supabase = await createAuthServerClient()
+  
+  // During build time, supabase client might be null
+  if (!supabase) {
+    return [] // Return empty array during build
+  }
   
   try {
     // This would typically fetch from a user_roles table

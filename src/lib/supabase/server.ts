@@ -20,9 +20,12 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
  * - Database operations in API routes
  */
 export const createClient = async () => {
-  // Defensive check for environment variables during build time
+  // Defensive check for environment variables - graceful handling during build time
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables. Please check your environment configuration.')
+    // During static generation, env vars might not be available - return null gracefully
+    // At runtime on Vercel, the environment variables will be available
+    console.log('⚠️  Supabase env vars not available during static generation - skipping client creation')
+    return null
   }
 
   const { cookies } = await import('next/headers')
@@ -66,9 +69,12 @@ export const createClient = async () => {
  * - Request/response processing
  */
 export const createMiddlewareClient = (request: NextRequest) => {
-  // Defensive check for environment variables
+  // Defensive check for environment variables - graceful handling during build time
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables. Please check your environment configuration.')
+    // During static generation, env vars might not be available - return null gracefully
+    // At runtime on Vercel, the environment variables will be available
+    console.log('⚠️  Supabase env vars not available during static generation - skipping middleware client creation')
+    return null
   }
 
   let supabaseResponse = NextResponse.next({
