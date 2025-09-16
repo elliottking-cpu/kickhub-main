@@ -1,6 +1,6 @@
-// middleware.ts - Simplified Edge Runtime compatible route protection middleware 
-import { createServerClient } from '@supabase/ssr'
+// middleware.ts - Minimal Edge Runtime compatible middleware for debugging
 import { NextResponse, type NextRequest } from 'next/server'
+// Temporarily removed: import { createServerClient } from '@supabase/ssr'
 
 // Define route protection rules
 const ROUTE_PROTECTION_RULES = {
@@ -94,6 +94,12 @@ export async function middleware(request: NextRequest) {
     console.log(`Middleware: Supabase URL exists: ${!!supabaseUrl}`)
     console.log(`Middleware: Supabase Key exists: ${!!supabaseKey}`)
     
+    // TEMPORARILY: Skip authentication and allow all access for debugging
+    console.log(`Middleware: DEBUGGING MODE - Allowing access to ${pathname}`)
+    return NextResponse.next()
+    
+    /* TEMPORARILY COMMENTED OUT TO ISOLATE __dirname ERROR:
+    
     if (!supabaseUrl || !supabaseKey) {
       console.log('Middleware: Missing environment variables, allowing access')
       return NextResponse.next()
@@ -171,6 +177,9 @@ export async function middleware(request: NextRequest) {
         headers: requestHeaders,
       },
     })
+    
+    END OF COMMENTED SECTION */
+    
   } catch (error) {
     console.error('Middleware: Unexpected error:', error)
     // For debugging, let's see the full error
@@ -194,6 +203,8 @@ function isPublicRoute(pathname: string): boolean {
     return false
   })
 }
+
+/* TEMPORARILY COMMENTED OUT - DEBUGGING __dirname ERROR:
 
 // Get user with roles from request
 async function getUserWithRoles(supabase: any): Promise<{
@@ -234,6 +245,10 @@ async function getUserWithRoles(supabase: any): Promise<{
     return { user: null, roles: [], error }
   }
 }
+
+*/
+
+/* TEMPORARILY COMMENTED OUT ALL FUNCTIONS - DEBUGGING __dirname ERROR:
 
 // Check if user has access to route
 function checkRouteAccess(pathname: string, userRoles: string[]): {
@@ -350,6 +365,8 @@ function handleUnauthorizedAccess(
   // Default: redirect to login
   return redirectToLogin(request)
 }
+
+END OF COMMENTED OUT FUNCTIONS */
 
 export const config = {
   matcher: [
