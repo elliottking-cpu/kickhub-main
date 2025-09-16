@@ -1,9 +1,4 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Training Sessions - KickHub",
-  description: "Plan and manage training sessions",
-};
+"use client"
 
 export default function TrainingPage() {
   return (

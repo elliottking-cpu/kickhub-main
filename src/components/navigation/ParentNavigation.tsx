@@ -1,4 +1,5 @@
 // src/components/navigation/ParentNavigation.tsx - Parent-specific navigation component
+"use client"
 import React from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'

@@ -1,9 +1,4 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Kit Management - KickHub",
-  description: "Design and order team kits",
-};
+"use client"
 
 export default function KitManagementPage() {
   return (

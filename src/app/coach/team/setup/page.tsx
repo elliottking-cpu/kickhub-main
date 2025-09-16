@@ -1,9 +1,4 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Team Setup - KickHub",
-  description: "Configure your team settings",
-};
+"use client"
 
 export default function TeamSetupPage() {
   return (

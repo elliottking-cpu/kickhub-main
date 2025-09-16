@@ -1,4 +1,5 @@
 // src/components/navigation/RoleBasedNavigation.tsx - Multi-role navigation
+"use client"
 import React from 'react'
 import Link from 'next/link'
 import { usePermissions } from '@/hooks/usePermissions'

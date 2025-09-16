@@ -1,9 +1,4 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Referee Booking - KickHub",
-  description: "Book and manage referees",
-};
+"use client"
 
 export default function RefereesPage() {
   return (

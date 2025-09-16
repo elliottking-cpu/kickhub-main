@@ -1,9 +1,4 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Volunteer Management - KickHub",
-  description: "Coordinate team volunteers",
-};
+"use client"
 
 export default function VolunteersPage() {
   return (

@@ -1,9 +1,4 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Player Management - KickHub",
-  description: "Manage your team players",
-};
+"use client"
 
 export default function PlayerManagementPage() {
   return (

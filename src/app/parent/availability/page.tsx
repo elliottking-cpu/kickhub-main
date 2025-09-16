@@ -1,9 +1,4 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Availability - KickHub",
-  description: "Manage child availability for matches and training",
-};
+"use client"
 
 export default function AvailabilityPage() {
   return (

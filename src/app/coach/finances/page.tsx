@@ -1,9 +1,4 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Team Finances - KickHub",
-  description: "Manage team finances and payments",
-};
+"use client"
 
 export default function FinancesPage() {
   return (

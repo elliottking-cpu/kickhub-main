@@ -1,4 +1,5 @@
 // app/not-found.tsx - Global 404 page (Build Guide Step 2.4)
+"use client"
 import Link from 'next/link'
 import { FileQuestion, Home, ArrowLeft } from 'lucide-react'
 

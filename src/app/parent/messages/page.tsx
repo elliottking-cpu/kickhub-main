@@ -1,9 +1,4 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Messages - KickHub",
-  description: "Team communications and updates",
-};
+"use client"
 
 export default function MessagesPage() {
   return (
