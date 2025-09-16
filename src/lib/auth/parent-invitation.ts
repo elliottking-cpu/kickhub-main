@@ -32,7 +32,7 @@ export class ParentInvitationService extends EmailPasswordAuth {
    * Send parent invitation with login code
    */
   async sendParentInvitation(data: ParentInvitationData): Promise<AuthResult> {
-    return withAuthErrorHandling(async () => {
+    try {
       // Step 1: Validate invitation data
       const validation = this.validateInvitationData(data)
       if (!validation.isValid) {
@@ -77,14 +77,20 @@ export class ParentInvitationService extends EmailPasswordAuth {
           invitationCode // For testing purposes - remove in production
         }
       }
-    }, 'parent-invitation')
+    } catch (error) {
+      console.error('Parent invitation error:', error)
+      return {
+        success: false,
+        error: { message: 'Failed to send parent invitation' }
+      }
+    }
   }
 
   /**
    * Register parent with invitation code
    */
   async registerParentWithCode(data: ParentRegistrationData): Promise<AuthResult> {
-    return withAuthErrorHandling(async () => {
+    try {
       // Step 1: Validate invitation code
       const invitationResult = await this.validateInvitationCode(data.invitationCode)
       if (!invitationResult.success || !invitationResult.data) {
@@ -136,9 +142,18 @@ export class ParentInvitationService extends EmailPasswordAuth {
       } catch (error) {
         // Cleanup auth user on failure
         await this.cleanupAuthUser(authUser.id)
-        throw error
+        return {
+          success: false,
+          error: { message: 'Registration failed during setup' }
+        }
       }
-    }, 'parent-registration')
+    } catch (error) {
+      console.error('Parent registration error:', error)
+      return {
+        success: false,
+        error: { message: 'Parent registration failed' }
+      }
+    }
   }
 
   /**

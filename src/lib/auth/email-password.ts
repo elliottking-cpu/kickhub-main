@@ -9,8 +9,15 @@ import { authConfig, type PasswordRequirements } from './auth-config'
 import type { AuthResult, AuthError, PasswordValidationResult } from './types'
 
 export class EmailPasswordAuth {
-  protected supabase = createAuthServerClient()
+  protected supabase: any = null
   protected config = authConfig
+
+  protected async getSupabaseClient() {
+    if (!this.supabase) {
+      this.supabase = await createAuthServerClient()
+    }
+    return this.supabase
+  }
 
   /**
    * Validate password strength according to requirements
@@ -100,7 +107,8 @@ export class EmailPasswordAuth {
       }
 
       // Create auth user
-      const { data: authData, error } = await this.supabase.auth.signUp({
+      const supabase = await this.getSupabaseClient()
+      const { data: authData, error } = await supabase.auth.signUp({
         email: data.email.toLowerCase().trim(),
         password: data.password,
         options: {
@@ -144,7 +152,8 @@ export class EmailPasswordAuth {
       }
 
       // Sign in with Supabase
-      const { data, error } = await this.supabase.auth.signInWithPassword({
+      const supabase = await this.getSupabaseClient()
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.toLowerCase().trim(),
         password: password
       })
@@ -176,7 +185,8 @@ export class EmailPasswordAuth {
    */
   async signOut(): Promise<AuthResult> {
     try {
-      const { error } = await this.supabase.auth.signOut()
+      const supabase = await this.getSupabaseClient()
+      const { error } = await supabase.auth.signOut()
       
       if (error) {
         return {
@@ -215,7 +225,8 @@ export class EmailPasswordAuth {
         }
       }
 
-      const { error } = await this.supabase.auth.resetPasswordForEmail(
+      const supabase = await this.getSupabaseClient()
+      const { error } = await supabase.auth.resetPasswordForEmail(
         email.toLowerCase().trim(),
         {
           redirectTo: `${window.location.origin}/auth/reset-password`
@@ -255,7 +266,8 @@ export class EmailPasswordAuth {
         }
       }
 
-      const { error } = await this.supabase.auth.updateUser({
+      const supabase = await this.getSupabaseClient()
+      const { error } = await supabase.auth.updateUser({
         password: newPassword
       })
 
@@ -283,7 +295,8 @@ export class EmailPasswordAuth {
    */
   async getCurrentUser(): Promise<AuthResult> {
     try {
-      const { data: { user }, error } = await this.supabase.auth.getUser()
+      const supabase = await this.getSupabaseClient()
+      const { data: { user }, error } = await supabase.auth.getUser()
       
       if (error) {
         return {
@@ -309,7 +322,8 @@ export class EmailPasswordAuth {
    */
   async getCurrentSession(): Promise<AuthResult> {
     try {
-      const { data: { session }, error } = await this.supabase.auth.getSession()
+      const supabase = await this.getSupabaseClient()
+      const { data: { session }, error } = await supabase.auth.getSession()
       
       if (error) {
         return {
@@ -333,8 +347,9 @@ export class EmailPasswordAuth {
   /**
    * Listen for auth state changes
    */
-  onAuthStateChange(callback: (event: string, session: any) => void) {
-    return this.supabase.auth.onAuthStateChange(callback)
+  async onAuthStateChange(callback: (event: string, session: any) => void) {
+    const supabase = await this.getSupabaseClient()
+    return supabase.auth.onAuthStateChange(callback)
   }
 
   /**
@@ -342,7 +357,8 @@ export class EmailPasswordAuth {
    */
   async refreshSession(): Promise<AuthResult> {
     try {
-      const { data, error } = await this.supabase.auth.refreshSession()
+      const supabase = await this.getSupabaseClient()
+      const { data, error } = await supabase.auth.refreshSession()
       
       if (error) {
         return {

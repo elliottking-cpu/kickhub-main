@@ -33,7 +33,7 @@ export class CoachRegistration extends EmailPasswordAuth {
    * This is the primary entry point for new users
    */
   async registerCoach(data: CoachRegistrationData): Promise<AuthResult> {
-    return withAuthErrorHandling(async () => {
+    try {
       // Step 1: Validate input data
       const validation = this.validateCoachRegistrationData(data)
       if (!validation.isValid) {
@@ -92,9 +92,18 @@ export class CoachRegistration extends EmailPasswordAuth {
       } catch (error) {
         // Cleanup on failure
         await this.cleanupFailedRegistration(authUser.id)
-        throw error
+        return {
+          success: false,
+          error: { message: 'Registration failed during team setup' }
+        }
       }
-    }, 'coach-registration')
+    } catch (error) {
+      console.error('Coach registration error:', error)
+      return {
+        success: false,
+        error: { message: 'Registration failed' }
+      }
+    }
   }
 
   /**

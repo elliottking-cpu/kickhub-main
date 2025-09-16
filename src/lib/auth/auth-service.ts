@@ -153,7 +153,7 @@ export class AuthService {
    * Get enhanced user profile with roles and permissions
    */
   async getEnhancedUserProfile(userId?: string): Promise<AuthResult<AuthUser>> {
-    return withAuthErrorHandling(async () => {
+    try {
       const currentUser = userId ? { id: userId } : await getServerSession()
       
       if (!currentUser?.id) {
@@ -173,7 +173,10 @@ export class AuthService {
         .single()
 
       if (profileError) {
-        throw new Error('Failed to get user profile')
+        return {
+          success: false,
+          error: { message: 'Failed to get user profile' }
+        }
       }
 
       // Get user roles
@@ -184,7 +187,10 @@ export class AuthService {
         .eq('is_active', true)
 
       if (rolesError) {
-        throw new Error('Failed to get user roles')
+        return {
+          success: false,
+          error: { message: 'Failed to get user roles' }
+        }
       }
 
       // Get permissions based on roles
@@ -214,7 +220,13 @@ export class AuthService {
         success: true,
         data: enhancedUser
       }
-    }, 'get-enhanced-user-profile')
+    } catch (error) {
+      console.error('Error in getEnhancedUserProfile:', error)
+      return {
+        success: false,
+        error: { message: 'Internal server error' }
+      }
+    }
   }
 
   /**
@@ -319,7 +331,7 @@ export class AuthService {
    */
   createAuthListener(callback: (user: any, session: any) => void) {
     const { data: { subscription } } = this.supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event: any, session: any) => {
         console.log('Auth state changed:', event, session?.user?.id)
         
         if (session?.user) {
