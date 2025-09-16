@@ -1,0 +1,15 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Schedule - KickHub",
+  description: "View matches and training schedule",
+};
+
+export default function SchedulePage() {
+  return (
+    <div className="p-6">
+      <h1 className="text-3xl font-bold mb-6">Schedule</h1>
+      <p className="text-gray-700">View upcoming matches and training sessions.</p>
+    </div>
+  );
+}
