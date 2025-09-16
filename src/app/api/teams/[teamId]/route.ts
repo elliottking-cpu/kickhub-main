@@ -73,6 +73,15 @@ export async function PUT(
 ) {
   try {
     const supabase = await createClient()
+    
+    // Handle case where supabase client is null during build time
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Service unavailable during build' },
+        { status: 503 }
+      )
+    }
+    
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
