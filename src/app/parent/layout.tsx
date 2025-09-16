@@ -42,7 +42,7 @@ export default async function ParentLayout({
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Parent Navigation */}
-      <ParentNavigation user={user} />
+      <ParentNavigation />
       
       {/* Main Content Area */}
       <main className="lg:pl-64">

@@ -1,6 +1,10 @@
 // middleware.ts - Enhanced route protection middleware (Build Guide Step 4.4)
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { RouteProtectionCache } from '@/lib/auth/performance-cache'
+import { CSRFProtection, withCSRFProtection } from '@/lib/security/csrf-protection'
+import { RateLimiter } from '@/lib/security/rate-limiting'
+import { SecurityAuditLogger } from '@/lib/security/audit-logging'
 
 // Define route protection rules
 const ROUTE_PROTECTION_RULES = {
@@ -76,7 +80,30 @@ const ROUTE_PROTECTION_RULES = {
 }
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+  const { pathname, search } = request.nextUrl
+  const method = request.method
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown'
+  const userAgent = request.headers.get('user-agent') || 'unknown'
+  
+  // Rate limiting check first
+  const rateLimitResult = RateLimiter.checkMiddlewareLimit(request)
+  if (!rateLimitResult.success) {
+    await SecurityAuditLogger.logRateLimitExceeded({
+      ip,
+      userAgent,
+      path: pathname + search,
+      method,
+      limit: rateLimitResult.limit,
+      attempts: rateLimitResult.limit + 1
+    })
+    
+    const response = NextResponse.json(
+      { error: 'Rate limit exceeded' },
+      { status: 429 }
+    )
+    RateLimiter.addHeaders(response.headers, rateLimitResult)
+    return response
+  }
   
   // Update session first
   let response = NextResponse.next({
@@ -110,10 +137,23 @@ export async function middleware(request: NextRequest) {
 
   // Skip protection for public routes
   if (isPublicRoute(pathname)) {
+    // Still apply CSRF protection to public routes with forms
+    return withCSRFProtection(request, response)
+  }
+  
+  // Apply CSRF protection
+  response = withCSRFProtection(request, response)
+  if (response.status === 403) {
+    await SecurityAuditLogger.logCSRFViolation({
+      ip,
+      userAgent,
+      path: pathname + search,
+      method
+    })
     return response
   }
   
-  // Get user session and roles
+  // Get user session and roles with caching
   const { user, roles, error } = await getUserWithRoles(supabase)
   
   // Handle authentication errors
@@ -127,10 +167,32 @@ export async function middleware(request: NextRequest) {
     return redirectToLogin(request)
   }
   
-  // Check route access permissions
-  const accessResult = checkRouteAccess(pathname, roles)
+  // Check cached route access first
+  const cacheKey = RouteProtectionCache.generateRouteCacheKey(user.id, pathname, roles)
+  const cachedAccess = RouteProtectionCache.getCachedRouteAccess(cacheKey)
+  
+  let accessResult
+  if (cachedAccess !== null) {
+    accessResult = { hasAccess: cachedAccess, accessType: 'cached' as const }
+  } else {
+    // Check route access permissions and cache result
+    accessResult = checkRouteAccess(pathname, roles)
+    RouteProtectionCache.setCachedRouteAccess(cacheKey, accessResult.hasAccess)
+  }
   
   if (!accessResult.hasAccess) {
+    // Log unauthorized access attempt
+    await SecurityAuditLogger.logUnauthorizedAccess({
+      userId: user?.id,
+      ip,
+      userAgent,
+      path: pathname + search,
+      method,
+      requiredRoles: accessResult.requiredRoles,
+      userRoles: roles,
+      reason: `Access denied for ${accessResult.accessType} route`
+    })
+    
     return handleUnauthorizedAccess(request, user, roles, accessResult)
   }
   
@@ -174,18 +236,8 @@ async function getUserWithRoles(supabase: any): Promise<{
       return { user: null, roles: [], error: userError }
     }
 
-    // Get user roles
-    const { data: userRoles, error: rolesError } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('is_active', true)
-
-    if (rolesError) {
-      return { user, roles: [], error: rolesError }
-    }
-
-    const roles = userRoles?.map(r => r.role) || []
+    // Get user roles with caching
+    const roles = await RouteProtectionCache.getUserRoles(user.id)
     return { user, roles, error: null }
   } catch (error) {
     return { user: null, roles: [], error }

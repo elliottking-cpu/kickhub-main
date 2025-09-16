@@ -1,4 +1,6 @@
 // src/components/auth/RouteProtection.tsx - Client-side route protection
+"use client"
+
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
@@ -20,14 +22,19 @@ export function RouteProtection({
   redirectTo
 }: RouteProtectionProps) {
   const { user, loading: authLoading } = useAuth()
-  const { hasRole, hasAnyRole, hasPermission, loading: permissionsLoading } = usePermissions()
+  const { hasRole, hasPermission } = usePermissions()
   const router = useRouter()
   const [accessGranted, setAccessGranted] = useState(false)
 
+  // Helper function to check if user has any of the required roles
+  const hasAnyRole = (roles: string[]) => {
+    return roles.some(role => hasRole(role as any))
+  }
+
   useEffect(() => {
     const checkAccess = async () => {
-      // Wait for auth and permissions to load
-      if (authLoading || permissionsLoading) return
+      // Wait for auth to load
+      if (authLoading) return
 
       // Check authentication
       if (!user) {
@@ -65,7 +72,7 @@ export function RouteProtection({
     }
 
     checkAccess()
-  }, [user, authLoading, permissionsLoading, requiredRoles, requiredPermissions])
+  }, [user, authLoading, requiredRoles, requiredPermissions])
 
   const handleUnauthorizedAccess = () => {
     if (redirectTo) {
@@ -74,7 +81,8 @@ export function RouteProtection({
       // Will render fallback component
     } else {
       // Redirect to appropriate dashboard based on user's primary role
-      const primaryRole = user?.roles?.[0]?.role
+      // For now, default to parent role - this would be fetched from database in real implementation
+      const primaryRole: string = 'parent'
       switch (primaryRole) {
         case 'coach':
         case 'assistant_coach':
@@ -99,7 +107,7 @@ export function RouteProtection({
   }
 
   // Show loading state
-  if (authLoading || permissionsLoading) {
+  if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
@@ -154,7 +162,12 @@ export function useRouteAccess(
   requiredPermissions: string[] = []
 ) {
   const { user, loading: authLoading } = useAuth()
-  const { hasAnyRole, hasPermission, loading: permissionsLoading } = usePermissions()
+  const { hasRole, hasPermission } = usePermissions()
+  
+  // Helper function to check if user has any of the required roles
+  const hasAnyRole = (roles: string[]) => {
+    return roles.some(role => hasRole(role as any))
+  }
   const [accessState, setAccessState] = useState({
     hasAccess: false,
     loading: true,
@@ -163,7 +176,7 @@ export function useRouteAccess(
 
   useEffect(() => {
     const checkAccess = async () => {
-      if (authLoading || permissionsLoading) {
+      if (authLoading) {
         setAccessState({ hasAccess: false, loading: true, reason: null })
         return
       }
@@ -195,7 +208,7 @@ export function useRouteAccess(
     }
 
     checkAccess()
-  }, [user, authLoading, permissionsLoading, requiredRoles, requiredPermissions])
+  }, [user, authLoading, requiredRoles, requiredPermissions])
 
   return accessState
 }

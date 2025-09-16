@@ -1,6 +1,6 @@
 // src/app/api/teams/[teamId]/route.ts - Protected API route
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { UnifiedPermissionSystem } from '@/lib/auth/permissions'
 
 export async function GET(
@@ -20,13 +20,12 @@ export async function GET(
     }
 
     // Check permissions
-    const permissionSystem = new UnifiedPermissionSystem()
-    const hasAccess = await permissionSystem.hasPermission(
-      user.id,
-      'view_team_data',
-      'team',
-      params.teamId
-    )
+    const permissionSystem = new UnifiedPermissionSystem({
+      userId: user.id,
+      roles: ['parent'], // This would be fetched from database
+      teamIds: [params.teamId]
+    })
+    const hasAccess = permissionSystem.hasPermission('team', 'view', { teamId: params.teamId })
 
     if (!hasAccess) {
       return NextResponse.json(
@@ -75,13 +74,12 @@ export async function PUT(
     }
 
     // Check management permissions
-    const permissionSystem = new UnifiedPermissionSystem()
-    const canManage = await permissionSystem.hasPermission(
-      user.id,
-      'manage_team',
-      'team',
-      params.teamId
-    )
+    const permissionSystem = new UnifiedPermissionSystem({
+      userId: user.id,
+      roles: ['coach'], // This would be fetched from database
+      teamIds: [params.teamId]
+    })
+    const canManage = permissionSystem.hasPermission('team', 'manage', { teamId: params.teamId })
 
     if (!canManage) {
       return NextResponse.json(

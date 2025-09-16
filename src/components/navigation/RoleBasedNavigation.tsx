@@ -6,19 +6,19 @@ import { useAuth } from '@/hooks/useAuth'
 
 export function RoleBasedNavigation() {
   const { user } = useAuth()
-  const { 
-    isCoach, 
-    isAssistantCoach, 
-    isParent, 
-    isPlayer, 
-    isFan, 
-    isReferee,
-    hasMultipleRoles,
-    permissions 
-  } = usePermissions()
+  const { userRoles, hasRole } = usePermissions()
+  
+  // Helper functions to check roles
+  const isCoach = hasRole('coach' as any)
+  const isAssistantCoach = hasRole('assistant_coach' as any)
+  const isParent = hasRole('parent' as any)
+  const isPlayer = hasRole('player' as any)
+  const isFan = hasRole('fan' as any)
+  const isReferee = hasRole('referee' as any)
+  const hasMultipleRoles = userRoles.length > 1
 
   // Role checking integration for navigation items
-  const hasRole = (role: string) => {
+  const hasAnyRole = (role: string) => {
     return isCoach || isAssistantCoach || isParent || isPlayer || isFan || isReferee
   }
 
@@ -99,7 +99,7 @@ export function RoleBasedNavigation() {
   }
 
   // Shared/Multi-role Navigation
-  if (permissions?.activeTeams.length > 0) {
+  if (userRoles.length > 0) {
     navigationItems.push({
       label: 'Team Calendar',
       href: '/calendar',
@@ -128,11 +128,11 @@ export function RoleBasedNavigation() {
               <div className="flex items-center space-x-2 px-3 py-1 bg-blue-100 rounded-full">
                 <span className="text-sm text-blue-800">Multiple Roles</span>
                 <div className="flex space-x-1">
-                  {permissions?.roles.map((role, index) => (
+                  {userRoles.map((role, index) => (
                     <span
                       key={index}
                       className="w-2 h-2 bg-blue-500 rounded-full"
-                      title={role.role}
+                      title={role}
                     />
                   ))}
                 </div>
@@ -154,12 +154,12 @@ export function RoleBasedNavigation() {
             
             <div className="flex items-center space-x-2">
               <img
-                src={user?.profile_photo_url || '/default-avatar.png'}
+                src={user?.user_metadata?.avatar_url || '/default-avatar.png'}
                 alt="Profile"
                 className="w-8 h-8 rounded-full"
               />
               <span className="hidden md:inline text-sm text-gray-700">
-                {user?.full_name}
+                {user?.email || 'User'}
               </span>
             </div>
           </div>

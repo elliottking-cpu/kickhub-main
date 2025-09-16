@@ -2,7 +2,7 @@
 'use client'
 
 import * as React from 'react'
-import { ThemeProvider as NextThemesProvider, type ThemeProviderProps } from 'next-themes'
+import { ThemeProvider as NextThemesProvider, type ThemeProviderProps, useTheme } from 'next-themes'
 
 /**
  * ThemeProvider Component - Dark/Light Mode Support
@@ -37,15 +37,7 @@ export function ThemeProvider({
  * Provides convenient access to theme state and controls
  */
 export function useKickHubTheme() {
-  const { theme, setTheme, resolvedTheme, themes } = React.useContext(
-    // This will be replaced with proper next-themes context when available
-    React.createContext({
-      theme: 'system',
-      setTheme: () => {},
-      resolvedTheme: 'light',
-      themes: ['light', 'dark', 'system'],
-    })
-  )
+  const { theme, setTheme, resolvedTheme, themes } = useTheme()
 
   const toggleTheme = React.useCallback(() => {
     if (resolvedTheme === 'dark') {

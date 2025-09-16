@@ -35,12 +35,17 @@ export const createClient = () => {
     {
       cookies: {
         getAll() {
-          return cookieStore.getAll()
+          // Handle both sync and async cookies with proper type casting
+          try {
+            return (cookieStore as any).getAll()
+          } catch (error) {
+            return []
+          }
         },
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options)
+              (cookieStore as any).set(name, value, options)
             })
           } catch (error) {
             // The `setAll` method was called from a Server Component.

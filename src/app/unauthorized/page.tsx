@@ -10,7 +10,7 @@ export default function UnauthorizedPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user } = useAuth()
-  const { permissions } = usePermissions()
+  const { userRoles } = usePermissions()
   
   const reason = searchParams.get('reason')
   const message = searchParams.get('message')
@@ -38,7 +38,7 @@ export default function UnauthorizedPage() {
     }
 
     // Suggest appropriate dashboard based on user's roles
-    const primaryRole = permissions?.roles[0]?.role
+    const primaryRole = userRoles[0]
     switch (primaryRole) {
       case 'coach':
       case 'assistant_coach':
@@ -110,11 +110,11 @@ export default function UnauthorizedPage() {
             {getErrorMessage()}
           </p>
 
-          {user && permissions?.roles.length > 0 && (
+          {user && userRoles.length > 0 && (
             <div className="mt-4 p-4 bg-blue-50 rounded-md">
               <p className="text-sm text-blue-800">
                 <strong>Your current roles:</strong>{' '}
-                {permissions.roles.map(r => r.role).join(', ')}
+                {userRoles.join(', ')}
               </p>
             </div>
           )}
