@@ -1,10 +1,6 @@
-// middleware.ts - Enhanced route protection middleware (Build Guide Step 4.4)
+// middleware.ts - Simplified Edge Runtime compatible route protection middleware 
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { RouteProtectionCache } from '@/lib/auth/performance-cache'
-import { CSRFProtection, withCSRFProtection } from '@/lib/security/csrf-protection'
-import { RateLimiter } from '@/lib/security/rate-limiting'
-import { SecurityAuditLogger } from '@/lib/security/audit-logging'
 
 // Define route protection rules
 const ROUTE_PROTECTION_RULES = {
@@ -80,29 +76,11 @@ const ROUTE_PROTECTION_RULES = {
 }
 
 export async function middleware(request: NextRequest) {
-  const { pathname, search } = request.nextUrl
-  const method = request.method
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown'
-  const userAgent = request.headers.get('user-agent') || 'unknown'
+  const { pathname } = request.nextUrl
   
-  // Rate limiting check first
-  const rateLimitResult = RateLimiter.checkMiddlewareLimit(request)
-  if (!rateLimitResult.success) {
-    await SecurityAuditLogger.logRateLimitExceeded({
-      ip,
-      userAgent,
-      path: pathname + search,
-      method,
-      limit: rateLimitResult.limit,
-      attempts: rateLimitResult.limit + 1
-    })
-    
-    const response = NextResponse.json(
-      { error: 'Rate limit exceeded' },
-      { status: 429 }
-    )
-    RateLimiter.addHeaders(response.headers, rateLimitResult)
-    return response
+  // Skip protection for public routes
+  if (isPublicRoute(pathname)) {
+    return NextResponse.next()
   }
   
   // Update session first
@@ -135,25 +113,7 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Skip protection for public routes
-  if (isPublicRoute(pathname)) {
-    // Still apply CSRF protection to public routes with forms
-    return withCSRFProtection(request, response)
-  }
-  
-  // Apply CSRF protection
-  response = withCSRFProtection(request, response)
-  if (response.status === 403) {
-    await SecurityAuditLogger.logCSRFViolation({
-      ip,
-      userAgent,
-      path: pathname + search,
-      method
-    })
-    return response
-  }
-  
-  // Get user session and roles with caching
+  // Get user session and roles
   const { user, roles, error } = await getUserWithRoles(supabase)
   
   // Handle authentication errors
@@ -167,32 +127,10 @@ export async function middleware(request: NextRequest) {
     return redirectToLogin(request)
   }
   
-  // Check cached route access first
-  const cacheKey = RouteProtectionCache.generateRouteCacheKey(user.id, pathname, roles)
-  const cachedAccess = RouteProtectionCache.getCachedRouteAccess(cacheKey)
-  
-  let accessResult
-  if (cachedAccess !== null) {
-    accessResult = { hasAccess: cachedAccess, accessType: 'cached' as const }
-  } else {
-    // Check route access permissions and cache result
-    accessResult = checkRouteAccess(pathname, roles)
-    RouteProtectionCache.setCachedRouteAccess(cacheKey, accessResult.hasAccess)
-  }
+  // Check route access permissions
+  const accessResult = checkRouteAccess(pathname, roles)
   
   if (!accessResult.hasAccess) {
-    // Log unauthorized access attempt
-    await SecurityAuditLogger.logUnauthorizedAccess({
-      userId: user?.id,
-      ip,
-      userAgent,
-      path: pathname + search,
-      method,
-      requiredRoles: accessResult.requiredRoles,
-      userRoles: roles,
-      reason: `Access denied for ${accessResult.accessType} route`
-    })
-    
     return handleUnauthorizedAccess(request, user, roles, accessResult)
   }
   
@@ -236,9 +174,27 @@ async function getUserWithRoles(supabase: any): Promise<{
       return { user: null, roles: [], error: userError }
     }
 
-    // Get user roles with caching
-    const roles = await RouteProtectionCache.getUserRoles(user.id)
-    return { user, roles, error: null }
+    // Get user roles from email-based logic (simplified for Edge Runtime)
+    // TODO: Replace with actual database query when schema is implemented
+    const email = user.email || ''
+    const userRoles: string[] = []
+    
+    if (email.includes('coach') || email.includes('admin')) {
+      userRoles.push('coach')
+    } else if (email.includes('parent')) {
+      userRoles.push('parent')  
+    } else if (email.includes('player')) {
+      userRoles.push('player')
+    } else if (email.includes('referee')) {
+      userRoles.push('referee')
+    } else if (email.includes('fan')) {
+      userRoles.push('fan')
+    } else {
+      // Default fallback role
+      userRoles.push('parent')
+    }
+
+    return { user, roles: userRoles, error: null }
   } catch (error) {
     return { user: null, roles: [], error }
   }
