@@ -154,7 +154,7 @@ export class AuthService {
    */
   async getEnhancedUserProfile(userId?: string): Promise<AuthResult<AuthUser>> {
     return withAuthErrorHandling(async () => {
-      const currentUser = userId ? { id: userId } : await getCurrentUser()
+      const currentUser = userId ? { id: userId } : await getServerSession()
       
       if (!currentUser?.id) {
         return {
@@ -303,7 +303,7 @@ export class AuthService {
    * Check if user is authenticated
    */
   async isAuthenticated(): Promise<boolean> {
-    const user = await getCurrentUser()
+    const user = await getServerSession()
     return !!user
   }
 

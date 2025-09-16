@@ -155,7 +155,7 @@ export function RoleBasedNavigation() {
             
             <div className="flex items-center space-x-2">
               <img
-                src={user?.user_metadata?.avatar_url || '/default-avatar.png'}
+                src={(user as any)?.user_metadata?.avatar_url || '/default-avatar.png'}
                 alt="Profile"
                 className="w-8 h-8 rounded-full"
               />

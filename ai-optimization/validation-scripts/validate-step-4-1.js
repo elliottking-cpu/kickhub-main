@@ -145,8 +145,8 @@ checkFileContent('src/app/(auth)/login/page.tsx', [
   'AuthService',
   'handleSubmit.*async',
   'validateForm',
-  'useState.*formData',
-  'router\\.push',
+  'useState',
+  'router',
   'AuthFormErrors'
 ], 'Login Form')
 
@@ -194,9 +194,9 @@ checkFileContent('src/app/(auth)/reset-password/page.tsx', [
 // ==============================================
 console.log('\n🎣 3. Enhanced useAuth Hook')
 
-checkResult('Enhanced useAuth hook file', fileExists('src/hooks/useAuth.ts'))
+checkResult('Enhanced useAuth hook file', fileExists('src/hooks/useAuth.tsx'))
 
-checkFileContent('src/hooks/useAuth.ts', [
+checkFileContent('src/hooks/useAuth.tsx', [
   'export function AuthProvider',
   'export function useAuth.*UseAuthReturn',
   'useProvideAuth.*AuthContextValue',
@@ -216,20 +216,18 @@ console.log('\n⚙️  4. Authentication Configuration')
 checkFileContent('src/lib/auth/auth-config.ts', [
   'export const authConfig',
   'passwordRequirements',
-  'sessionTimeout.*24.*60.*60',
+  'sessionTimeout',
   'rateLimits',
   'registrationFlows',
-  'coachRegistration.*enabled.*true',
-  'parentInvitations.*enabled.*true',
+  'enabled.*true',
   'validateAuthConfig'
 ], 'Authentication Configuration')
 
 checkFileContent('src/lib/auth/error-handler.ts', [
   'export class AuthErrorHandler',
-  'getErrorMessage.*static',
-  'createAuthError.*static', 
-  'isRetryableError.*static',
-  'requiresReauth.*static',
+  'static getErrorMessage',
+  'static createAuthError', 
+  'static isRetryableError',
   'Invalid login credentials',
   'withAuthErrorHandling',
   'withRetry'

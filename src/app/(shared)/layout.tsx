@@ -23,7 +23,7 @@ export default async function SharedLayout({
   
   // Skip auth during build time when environment variables might not be available
   try {
-    const supabase = createAuthServerClient()
+    const supabase = await createAuthServerClient()
     const { data: { user: authUser } } = await supabase.auth.getUser()
     user = authUser
 
@@ -51,7 +51,7 @@ export default async function SharedLayout({
             {/* User Info */}
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">
-                {user.email}
+                {user?.email || 'User'}
               </span>
             </div>
           </div>

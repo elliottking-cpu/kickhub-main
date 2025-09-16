@@ -12,8 +12,8 @@ import { createClient as createSupabaseClient } from '@/lib/supabase/server'
  * Create authenticated server client
  * This is used in server components and layouts for authentication
  */
-export const createAuthServerClient = async () => {
-  return await createSupabaseClient()
+export const createAuthServerClient = () => {
+  return createSupabaseClient()
 }
 
 /**
@@ -21,7 +21,7 @@ export const createAuthServerClient = async () => {
  * Returns user data if authenticated, null if not
  */
 export async function getServerSession() {
-  const supabase = await createAuthServerClient()
+  const supabase = createAuthServerClient()
   
   try {
     const { data: { user }, error } = await supabase.auth.getUser()
@@ -57,7 +57,7 @@ export async function requireAuth() {
  * Returns user profile data including roles and permissions
  */
 export async function getUserProfile(userId: string) {
-  const supabase = await createAuthServerClient()
+  const supabase = createAuthServerClient()
   
   try {
     // This would typically fetch from a profiles or user_roles table
@@ -85,7 +85,7 @@ export async function getUserProfile(userId: string) {
  * Returns array of roles for the current user
  */
 export async function getUserRoles(userId: string): Promise<string[]> {
-  const supabase = await createAuthServerClient()
+  const supabase = createAuthServerClient()
   
   try {
     // This would typically fetch from a user_roles table

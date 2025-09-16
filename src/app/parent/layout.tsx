@@ -25,7 +25,7 @@ export default async function ParentLayout({
   
   // Skip auth during build time when environment variables might not be available
   try {
-    const supabase = createAuthServerClient()
+    const supabase = await createAuthServerClient()
     const { data: { user: authUser } } = await supabase.auth.getUser()
     user = authUser
 

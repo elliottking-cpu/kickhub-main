@@ -6,7 +6,6 @@
  */
 
 import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -20,12 +19,13 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
  * - Authentication in server components
  * - Database operations in API routes
  */
-export const createClient = () => {
+export const createClient = async () => {
   // Defensive check for environment variables during build time
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Missing Supabase environment variables. Please check your environment configuration.')
   }
 
+  const { cookies } = await import('next/headers')
   const cookieStore = cookies()
   
   return createServerClient(

@@ -202,7 +202,7 @@ function useProvideAuth(): AuthContextValue {
 }
 
 // Standalone hook for components not using AuthProvider
-export function useAuthStandalone(): UseAuthReturn {
+function useAuthStandalone(): UseAuthReturn {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [session, setSession] = useState<AuthSession | null>(null)
   const [loading, setLoading] = useState(true)
@@ -349,5 +349,5 @@ export function useAuthStandalone(): UseAuthReturn {
   }
 }
 
-// Export the original useAuth for backward compatibility
-export { useAuthStandalone as useAuth }
+// Export both versions for backward compatibility
+export { useAuthStandalone }
