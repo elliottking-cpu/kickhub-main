@@ -1,26 +1,18 @@
-// lib/utils.ts - Utility functions for className merging (Build Guide Step 2.4)
-import { clsx, type ClassValue } from "clsx"
+// lib/utils.ts - Utility functions for KickHub application
+import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
 /**
- * Utility function for merging Tailwind CSS classes
- * 
- * This function combines clsx for conditional class names with tailwind-merge
- * to handle Tailwind CSS class conflicts intelligently.
- * 
- * @param inputs - Class names to merge
- * @returns Merged class string
- * 
- * Example usage:
- * cn('px-2 py-1', 'px-4') // Returns 'py-1 px-4' (px-4 overrides px-2)
- * cn('text-red-500', condition && 'text-blue-500') // Conditional classes
+ * Combines class names using clsx and tailwind-merge
+ * This is the standard utility for conditional Tailwind classes
+ * Used throughout the application for dynamic styling
  */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
 /**
- * Format currency for UK market
+ * Format currency for UK market (GBP)
  */
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-GB', {
@@ -30,68 +22,27 @@ export function formatCurrency(amount: number): string {
 }
 
 /**
- * Format date for UK market
+ * Format date for UK format
  */
 export function formatDate(date: Date | string): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date
   return new Intl.DateTimeFormat('en-GB', {
-    day: 'numeric',
+    day: '2-digit',
     month: 'short',
     year: 'numeric',
   }).format(dateObj)
 }
 
 /**
- * Format time for UK market
+ * Format time for UK format (24-hour)
  */
 export function formatTime(date: Date | string): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date
   return new Intl.DateTimeFormat('en-GB', {
     hour: '2-digit',
     minute: '2-digit',
+    hour12: false,
   }).format(dateObj)
-}
-
-/**
- * Generate initials from a name
- */
-export function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map(word => word.charAt(0))
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
-}
-
-/**
- * Truncate text to specified length
- */
-export function truncateText(text: string, length: number): string {
-  if (text.length <= length) return text
-  return text.slice(0, length) + '...'
-}
-
-/**
- * Sleep function for delays
- */
-export function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-/**
- * Check if string is valid email
- */
-export function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
-}
-
-/**
- * Generate random ID
- */
-export function generateId(): string {
-  return Math.random().toString(36).substring(2) + Date.now().toString(36)
 }
 
 /**
@@ -102,12 +53,51 @@ export function capitalize(str: string): string {
 }
 
 /**
- * Convert string to slug
+ * Generate initials from name
  */
-export function slugify(str: string): string {
-  return str
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+export function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .map(part => part.charAt(0))
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+}
+
+/**
+ * Truncate text to specified length
+ */
+export function truncate(text: string, length: number): string {
+  if (text.length <= length) return text
+  return text.slice(0, length) + '...'
+}
+
+/**
+ * Sleep utility for delays
+ */
+export function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+/**
+ * Check if value is empty (null, undefined, empty string, empty array)
+ */
+export function isEmpty(value: any): boolean {
+  if (value == null) return true
+  if (typeof value === 'string') return value.trim() === ''
+  if (Array.isArray(value)) return value.length === 0
+  if (typeof value === 'object') return Object.keys(value).length === 0
+  return false
+}
+
+/**
+ * Generate random ID
+ */
+export function generateId(length: number = 8): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  let result = ''
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return result
 }
