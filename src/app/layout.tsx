@@ -1,33 +1,48 @@
+// app/layout.tsx - Root layout (Build Guide Step 2.4)
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import { GlobalProviders } from "@/components/providers/GlobalProviders";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "KickHub - Grassroots Football Management",
-  description: "Comprehensive platform for coaches, parents, players, and fans. Manage teams, track progress, and connect with your football community.",
+  description: "The complete team management platform for UK coaches, parents, and players. Transform your grassroots football team with modern tools.",
+  keywords: ["football", "grassroots", "team management", "coaching", "UK football", "youth football"],
+  authors: [{ name: "KickHub Team" }],
+  creator: "KickHub",
+  publisher: "KickHub",
+  robots: "index, follow",
+  openGraph: {
+    type: "website",
+    locale: "en_GB",
+    url: "https://kickhub.com",
+    siteName: "KickHub",
+    title: "KickHub - Transform Your Grassroots Football Team",
+    description: "The complete team management platform built for UK coaches, parents, and players. From muddy pitches to match day magic.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "KickHub - Grassroots Football Management",
+    description: "Transform your grassroots football team with modern management tools.",
+    creator: "@kickhubapp",
+  },
+  viewport: "width=device-width, initial-scale=1",
+  themeColor: "#16a34a",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+    <html lang="en-GB">
+      <body className={inter.className}>
+        <GlobalProviders>
+          {children}
+        </GlobalProviders>
       </body>
     </html>
   );
