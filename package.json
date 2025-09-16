@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "validate:route-protection": "node ../scripts/validate-route-protection.js",
+    "test:route-protection": "jest src/lib/auth/__tests__/route-protection.test.ts --passWithNoTests"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",

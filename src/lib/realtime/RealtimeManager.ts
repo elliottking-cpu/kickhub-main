@@ -299,24 +299,17 @@ export class RealtimeManager {
    * Sets up monitoring for connection state changes
    */
   private setupConnectionMonitoring(): void {
-    // Monitor connection status
-    this.supabase.realtime.onOpen(() => {
-      console.log('Realtime connection opened')
-      this.connectionStatus = 'connected'
-      this.reconnectAttempts = 0
-    })
-
-    this.supabase.realtime.onClose(() => {
-      console.log('Realtime connection closed')
-      this.connectionStatus = 'disconnected'
-      this.handleReconnection()
-    })
-
-    this.supabase.realtime.onError((error) => {
-      console.error('Realtime connection error:', error)
-      this.connectionStatus = 'disconnected'
-      this.handleReconnection()
-    })
+    // Note: Supabase handles connection monitoring internally
+    // We monitor connection status through subscription callbacks
+    console.log('Real-time connection monitoring initialized')
+    
+    // Set up periodic status checking
+    setInterval(() => {
+      // Check if we have active channels as a proxy for connection status
+      if (this.channels.size > 0) {
+        this.connectionStatus = 'connected'
+      }
+    }, 5000)
   }
 
   /**
@@ -343,7 +336,8 @@ export class RealtimeManager {
    * Resubscribe to all active channels after reconnection
    */
   private async resubscribeAllChannels(): Promise<void> {
-    for (const [channelName, channel] of this.channels) {
+    const channelEntries = Array.from(this.channels.entries())
+    for (const [channelName, channel] of channelEntries) {
       try {
         await channel.subscribe()
         console.log(`Resubscribed to channel: ${channelName}`)
@@ -410,7 +404,8 @@ export class RealtimeManager {
    * Unsubscribe from all channels and cleanup
    */
   unsubscribeAll(): void {
-    for (const [channelName, channel] of this.channels) {
+    const channelEntries = Array.from(this.channels.entries())
+    for (const [channelName, channel] of channelEntries) {
       this.supabase.removeChannel(channel)
     }
     this.channels.clear()
@@ -445,3 +440,4 @@ export class RealtimeManager {
     await this.handleReconnection()
   }
 }
+

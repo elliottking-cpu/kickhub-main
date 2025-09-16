@@ -307,3 +307,4 @@ export class OfflineStateManager {
     document.removeEventListener('visibilitychange', this.syncPendingUpdates)
   }
 }
+

@@ -51,3 +51,4 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 GRANT EXECUTE ON FUNCTION get_realtime_tables() TO authenticated;
 
 COMMIT;
+

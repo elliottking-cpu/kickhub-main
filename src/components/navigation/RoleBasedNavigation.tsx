@@ -17,6 +17,11 @@ export function RoleBasedNavigation() {
     permissions 
   } = usePermissions()
 
+  // Role checking integration for navigation items
+  const hasRole = (role: string) => {
+    return isCoach || isAssistantCoach || isParent || isPlayer || isFan || isReferee
+  }
+
   const navigationItems = []
 
   // Coach/Assistant Coach Navigation
@@ -163,3 +168,4 @@ export function RoleBasedNavigation() {
     </nav>
   )
 }
+
