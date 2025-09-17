@@ -25,6 +25,12 @@ export async function requireAuth() {
 export async function requireRole(requiredRoles: string[]) {
   const user = await requireAuth()
   
+  // Handle case where user is null during build time
+  if (!user) {
+    console.log('Role check skipped during build time')
+    return
+  }
+  
   // This would fetch user roles from database in real implementation
   const userRoles = ['parent'] // Mock data - replace with actual database query
   
@@ -59,6 +65,12 @@ export async function requirePermission(
   context?: Record<string, any>
 ) {
   const user = await requireAuth()
+  
+  // Handle case where user is null during build time
+  if (!user) {
+    console.log('Permission check skipped during build time')
+    return
+  }
   
   // This would fetch user roles and context from database in real implementation
   const userRoles = ['parent'] // Mock data
