@@ -27,7 +27,11 @@ export const metadata: Metadata = {
     description: "Transform your grassroots football team with modern management tools.",
     creator: "@kickhubapp",
   },
-  viewport: "width=device-width, initial-scale=1",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
   themeColor: "#16a34a",
 };
 
