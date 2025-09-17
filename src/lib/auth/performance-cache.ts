@@ -170,9 +170,9 @@ export class RouteProtectionCache {
     if (!supabase) {
       return {
         roles: [],
-        teams: [],
+        activeTeams: [],
         permissions: [],
-        lastUpdated: Date.now()
+        expiry: Date.now()
       }
     }
 
