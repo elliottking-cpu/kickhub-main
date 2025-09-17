@@ -1,18 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Ensure proper static file serving and routing
+  // Ensure proper routing and performance  
   trailingSlash: false,
-  skipTrailingSlashRedirect: true,
-  
-  // Enable static exports for better Vercel compatibility
-  output: 'standalone',
-  
-  // Disable x-powered-by header
   poweredByHeader: false,
-  
-  // Enable compression
   compress: true,
+  
+  // Optimize for Vercel deployment
+  experimental: {
+    optimizePackageImports: ['@supabase/ssr'],
+  },
 };
 
 export default nextConfig;
