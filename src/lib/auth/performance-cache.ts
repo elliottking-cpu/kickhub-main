@@ -311,6 +311,17 @@ export class QueryOptimizer {
     // Batch fetch uncached users
     if (uncachedIds.length > 0) {
       const supabase = await createClient()
+      
+      // Handle case where supabase client is null during build time
+      if (!supabase) {
+        console.log('Batch user roles fetch unavailable during build time')
+        // Return empty roles for uncached users
+        for (const userId of uncachedIds) {
+          results.set(userId, [])
+        }
+        return results
+      }
+      
       const { data: userRoles, error } = await supabase
         .from('user_roles')
         .select('user_id, role')
